@@ -1,0 +1,17 @@
+{
+  "name": "buttonrig",
+  "version": "1.0.0",
+  "description": "API for your plugin to work with the Button Rig App.",
+  "type": "module",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "scripts": {
+    "build": "npx tsc"
+  },
+  "author": "Button Rig",
+  "license": "Apache 2.0",
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3"
+  }
+}
