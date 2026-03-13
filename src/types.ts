@@ -69,48 +69,24 @@ export interface RxLoadHandlerArgs {
   loadHandlerArgs: {
     handlerArgs: string[];
   };
-
-  // constructor(handlerArgs: string[]) {
-  //   this.loadHandlerArgs = {
-  //     handlerArgs,
-  //   };
-  // }
 }
 
 export interface RxFilePick {
   filePick: {
     file: string | null;
   };
-
-  // constructor() {
-  //   this.filePick = {
-  //     file: null,
-  //   };
-  // }
 }
 
 export interface RxFilesPick {
   filesPick: {
     files: string[];
   };
-
-  // constructor() {
-  //   this.filesPick = {
-  //     files: [],
-  //   };
-  // }
 }
 
 export interface RxFolderPick {
   folderPick: {
     folder: string | null;
   };
-
-  // constructor() {
-  //   this.folderPick = {
-  //     folder: null,
-  //   };
-  // }
 }
 
 export type TxPayload =
