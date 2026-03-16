@@ -15,6 +15,42 @@ export interface Message {
   payload: TxPayload;
 }
 
+export class PluginKey {
+  key: string;
+
+  constructor(key: string) {
+    this.key = key;
+  }
+
+  into(): string {
+    return "{{PLUGIN_" + this.key + "}}";
+  }
+
+  static from(arg: string): PluginKey | string {
+    const match = arg.match(/^{{PLUGIN_(.*)}}$/);
+    let key = match ? (match[1] ? match[1] : null) : null;
+    return key ? new PluginKey(key) : arg;
+  }
+}
+
+export class InstanceKey {
+  key: string;
+
+  constructor(key: string) {
+    this.key = key;
+  }
+
+  into(): string {
+    return "{{INSTANCE_" + this.key + "}}";
+  }
+
+  static from(arg: string): InstanceKey | string {
+    const match = arg.match(/^{{INSTANCE_(.*)}}$/);
+    let key = match ? (match[1] ? match[1] : null) : null;
+    return key ? new InstanceKey(key) : arg;
+  }
+}
+
 export function newMessage(payload: TxPayload): Message {
   return {
     buttonPluginActionId: window.name,
@@ -22,8 +58,8 @@ export function newMessage(payload: TxPayload): Message {
   };
 }
 
-export interface CallHandlerResponse {
-  response: string;
+export interface CallHandlerResponse<T> {
+  response: T;
   exitCode: number | null;
 }
 
@@ -32,12 +68,12 @@ export enum DistributionTarget {
   Linux_X86_64 = "Linux_X86_64",
 }
 
-export type RxPayload =
+export type RxPayload<T> =
   | RxFilePick
   | RxFilesPick
   | RxFolderPick
   | RxLoadHandlerArgs
-  | RxCallHandler
+  | RxCallHandler<T>
   | RxGetPluginKeyValue
   | RxGetInstanceKeyValue
   | RxGetCurrentTarget
@@ -45,7 +81,7 @@ export type RxPayload =
 
 export interface RxGetCurrentTarget {
   getCurrentTarget: {
-    target: DistributionTarget | null;
+    target: DistributionTarget;
   };
 }
 
@@ -61,8 +97,8 @@ export interface RxGetPluginKeyValue {
   };
 }
 
-export interface RxCallHandler {
-  callHandler: CallHandlerResponse;
+export interface RxCallHandler<T> {
+  callHandler: CallHandlerResponse<T>;
 }
 
 export interface RxLoadHandlerArgs {

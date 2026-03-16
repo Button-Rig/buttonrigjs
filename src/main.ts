@@ -12,6 +12,8 @@ import {
   type RxGetInstanceKeyValue,
   DistributionTarget,
   type RxGetCurrentTarget,
+  PluginKey,
+  InstanceKey,
 } from "./types.js";
 
 export function getPluginKeyValue<T>(key: string): Promise<T | null> {
@@ -91,21 +93,31 @@ export function removeInstanceKeyValue(key: string) {
   });
 }
 
-export function callHandler(args: string[]): Promise<CallHandlerResponse> {
+export function callHandler<T>(
+  args: Array<string | PluginKey | InstanceKey>,
+): Promise<CallHandlerResponse<T>> {
   return new Promise((resolve) => {
     postMessage({
       callHandler: {
-        handlerArgs: args,
+        handlerArgs: args.map((x) => {
+          if (x instanceof InstanceKey) {
+            return x.into();
+          } else if (x instanceof PluginKey) {
+            return x.into();
+          } else {
+            return x;
+          }
+        }),
       },
     });
     addEventListener("callHandler", (rxPayload) => {
-      let payload = rxPayload as RxCallHandler;
+      let payload = rxPayload as RxCallHandler<T>;
       resolve(payload.callHandler);
     });
   });
 }
 
-export function getCurrentTarget(): Promise<DistributionTarget | null> {
+export function getCurrentTarget(): Promise<DistributionTarget> {
   return new Promise((resolve) => {
     postMessage("getCurrentTarget");
     addEventListener("getCurrentTarget", (rxPayload) => {
@@ -131,18 +143,36 @@ export function setError(error: string) {
   });
 }
 
-export function saveHandlerArgs(args: string[]) {
+export function saveHandlerArgs(args: Array<string | PluginKey | InstanceKey>) {
   postMessage({
     saveHandlerArgs: {
-      handlerArgs: args,
+      handlerArgs: args.map((x) => {
+        if (x instanceof InstanceKey) {
+          return x.into();
+        } else if (x instanceof PluginKey) {
+          return x.into();
+        } else {
+          return x;
+        }
+      }),
     },
   });
 }
 
-export function loadHandlerArgs(fn: (handlerArgs: string[]) => void) {
+export function loadHandlerArgs(
+  fn: (handlerArgs: Array<string | PluginKey | InstanceKey>) => void,
+) {
   addEventListener("loadHandlerArgs", (payload) => {
     let loadHandlerArgsPayload = payload as RxLoadHandlerArgs;
-    fn(loadHandlerArgsPayload.loadHandlerArgs.handlerArgs);
+    fn(
+      loadHandlerArgsPayload.loadHandlerArgs.handlerArgs.map((x) => {
+        let y = PluginKey.from(x);
+        if (typeof y === "string") {
+          return InstanceKey.from(y);
+        }
+        return y;
+      }),
+    );
   });
   postMessage("readyToReceive");
 }
@@ -185,9 +215,9 @@ export function pickFolder(): Promise<string | null> {
   });
 }
 
-function addEventListener(
+function addEventListener<T>(
   eventType: string,
-  fn: (rxPayload: RxPayload) => void,
+  fn: (rxPayload: RxPayload<T>) => void,
 ) {
   window.addEventListener("message", (event) => {
     if (
@@ -198,7 +228,7 @@ function addEventListener(
     ) {
       return;
     }
-    fn(event.data.event as RxPayload);
+    fn(event.data.event as RxPayload<T>);
   });
 }
 
