@@ -26,13 +26,15 @@ export function getPluginKeyValue<T>(key: string): Promise<T | null> {
     });
     addEventListener("getPluginKeyValue", (rxPayload) => {
       let payload = rxPayload as RxGetPluginKeyValue;
-      if (
-        payload.getPluginKeyValue.value !== null &&
-        payload.getPluginKeyValue.value !== undefined
-      ) {
-        resolve(JSON.parse(payload.getPluginKeyValue.value) as T);
-      } else {
-        resolve(null);
+      if (payload.getPluginKeyValue.key == key) {
+        if (
+          payload.getPluginKeyValue.value !== null &&
+          payload.getPluginKeyValue.value !== undefined
+        ) {
+          resolve(JSON.parse(payload.getPluginKeyValue.value) as T);
+        } else {
+          resolve(null);
+        }
       }
     });
   });
@@ -65,13 +67,15 @@ export function getInstanceKeyValue<T>(key: string): Promise<T | null> {
 
     addEventListener("getInstanceKeyValue", (rxPayload) => {
       const payload = rxPayload as RxGetInstanceKeyValue;
-      if (
-        payload.getInstanceKeyValue.value !== null &&
-        payload.getInstanceKeyValue.value !== undefined
-      ) {
-        resolve(JSON.parse(payload.getInstanceKeyValue.value) as T);
-      } else {
-        resolve(null);
+      if (payload.getInstanceKeyValue.key == key) {
+        if (
+          payload.getInstanceKeyValue.value !== null &&
+          payload.getInstanceKeyValue.value !== undefined
+        ) {
+          resolve(JSON.parse(payload.getInstanceKeyValue.value) as T);
+        } else {
+          resolve(null);
+        }
       }
     });
   });

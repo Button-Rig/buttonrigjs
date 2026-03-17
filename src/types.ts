@@ -94,12 +94,14 @@ export interface RxGetCurrentTarget {
 
 export interface RxGetInstanceKeyValue {
   getInstanceKeyValue: {
+    key: string;
     value: string | null | undefined;
   };
 }
 
 export interface RxGetPluginKeyValue {
   getPluginKeyValue: {
+    key: string;
     value: string | null | undefined;
   };
 }
