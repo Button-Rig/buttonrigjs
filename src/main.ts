@@ -14,6 +14,7 @@ import {
   type RxGetCurrentTarget,
   PluginKey,
   InstanceKey,
+  type RxGetConfiguratorDefaultHeight,
 } from "./types.js";
 
 export function getPluginKeyValue<T>(key: string): Promise<T | null> {
@@ -123,6 +124,16 @@ export function getCurrentTarget(): Promise<DistributionTarget> {
     addEventListener("getCurrentTarget", (rxPayload) => {
       let payload = rxPayload as RxGetCurrentTarget;
       resolve(payload.getCurrentTarget.target);
+    });
+  });
+}
+
+export function getConfiguratorDefaultHeight(): Promise<number> {
+  return new Promise((resolve) => {
+    postMessage("getConfiguratorDefaultHeight");
+    addEventListener("getConfiguratorDefaultHeight", (rxPayload) => {
+      let payload = rxPayload as RxGetConfiguratorDefaultHeight;
+      resolve(payload.getConfiguratorDefaultHeight.height);
     });
   });
 }

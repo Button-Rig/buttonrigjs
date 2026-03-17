@@ -77,7 +77,14 @@ export type RxPayload<T> =
   | RxGetPluginKeyValue
   | RxGetInstanceKeyValue
   | RxGetCurrentTarget
+  | RxGetConfiguratorDefaultHeight
   | null;
+
+export interface RxGetConfiguratorDefaultHeight {
+  getConfiguratorDefaultHeight: {
+    height: number;
+  };
+}
 
 export interface RxGetCurrentTarget {
   getCurrentTarget: {
@@ -140,6 +147,7 @@ export type TxPayload =
   | TxPickFolder
   | TxReadyToReceive
   | TxSaveHandlerArgsPayload
+  | TxGetConfiguratorDefaultHeight
   | ErrorPayload;
 
 export interface TxSetConfiguratorHeight {
@@ -213,3 +221,4 @@ export interface TxSaveHandlerArgsPayload {
 export type TxReadyToReceive = "readyToReceive";
 export type TxPickFolder = "pickFolder";
 export type TxGetCurrentTarget = "getCurrentTarget";
+export type TxGetConfiguratorDefaultHeight = "getConfiguratorDefaultHeight";
