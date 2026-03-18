@@ -117,7 +117,14 @@ export function callHandler<T>(
     });
     addEventListener("callHandler", (rxPayload) => {
       let payload = rxPayload as RxCallHandler<T>;
-      resolve(payload.callHandler);
+      const raw = payload.callHandler.response;
+
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+
+      resolve({
+        ...payload.callHandler,
+        response: parsed,
+      });
     });
   });
 }
