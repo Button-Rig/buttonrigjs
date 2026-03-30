@@ -1,260 +1,89 @@
-import {
-  newMessage,
-  type RxPayload,
-  type TxPayload,
-  type RxLoadHandlerArgs,
-  type RxFilePick,
-  type RxFolderPick,
-  type RxFilesPick,
-  type RxCallHandler,
-  type CallHandlerResponse,
-  type RxGetPluginKeyValue,
-  type RxGetInstanceKeyValue,
-  DistributionTarget,
-  type RxGetCurrentTarget,
-  PluginKey,
-  InstanceKey,
-  type RxGetConfiguratorDefaultHeight,
-} from "./types.js";
+import { appPostMessage } from "./utils.js";
 
-export function getPluginKeyValue<T>(key: string): Promise<T | null> {
-  return new Promise((resolve) => {
-    postMessage({
-      getPluginKeyValue: {
-        key,
-      },
-    });
-    addEventListener("getPluginKeyValue", (rxPayload) => {
-      let payload = rxPayload as RxGetPluginKeyValue;
-      if (payload.getPluginKeyValue.key == key) {
-        if (
-          payload.getPluginKeyValue.value !== null &&
-          payload.getPluginKeyValue.value !== undefined
-        ) {
-          resolve(JSON.parse(payload.getPluginKeyValue.value) as T);
-        } else {
-          resolve(null);
-        }
-      }
-    });
-  });
-}
+export * from "./types/handler.js";
+export * from "./types/rxPayload.js";
+export * from "./types/txPayload.js";
+export * from "./types/utils.js";
+export * from "./functions/app.js";
+export * from "./functions/handler.js";
+export * from "./functions/keyValue.js";
+export * from "./functions/file.js";
+export * from "./utils.js";
 
-export function savePluginKeyValue<T>(key: string, value: T) {
-  postMessage({
-    savePluginKeyValue: {
-      key,
-      value: JSON.stringify(value),
-    },
-  });
-}
+(["log", "warn", "error", "info", "debug"] as const).forEach((level) => {
+  const _original = console[level];
 
-export function removePluginKeyValue(key: string) {
-  postMessage({
-    removePluginKeyValue: {
-      key,
-    },
-  });
-}
+  console[level] = (...args) => {
+    _original(...args);
 
-export function getInstanceKeyValue<T>(key: string): Promise<T | null> {
-  return new Promise((resolve) => {
-    postMessage({
-      getInstanceKeyValue: {
-        key,
-      },
-    });
-
-    addEventListener("getInstanceKeyValue", (rxPayload) => {
-      const payload = rxPayload as RxGetInstanceKeyValue;
-      if (payload.getInstanceKeyValue.key == key) {
-        if (
-          payload.getInstanceKeyValue.value !== null &&
-          payload.getInstanceKeyValue.value !== undefined
-        ) {
-          resolve(JSON.parse(payload.getInstanceKeyValue.value) as T);
-        } else {
-          resolve(null);
-        }
-      }
-    });
-  });
-}
-
-export function saveInstanceKeyValue<T>(key: string, value: T) {
-  postMessage({
-    saveInstanceKeyValue: {
-      key,
-      value: JSON.stringify(value),
-    },
-  });
-}
-
-export function removeInstanceKeyValue(key: string) {
-  postMessage({
-    removeInstanceKeyValue: {
-      key,
-    },
-  });
-}
-
-export function callHandler<T>(
-  args: Array<string | PluginKey | InstanceKey>,
-): Promise<CallHandlerResponse<T>> {
-  return new Promise((resolve) => {
-    postMessage({
-      callHandler: {
-        handlerArgs: args.map((x) => {
-          if (x instanceof InstanceKey) {
-            return x.into();
-          } else if (x instanceof PluginKey) {
-            return x.into();
-          } else {
-            return x;
+    const formatted = args
+      .map((arg) => {
+        if (arg === null) return "null";
+        if (arg === undefined) return "undefined";
+        if (typeof arg === "function") return arg.toString();
+        if (arg instanceof Error)
+          return `${arg.name}: ${arg.message}\n${arg.stack ?? ""}`;
+        if (typeof arg === "object") {
+          try {
+            return JSON.stringify(arg, null, 2);
+          } catch {
+            return Object.prototype.toString.call(arg);
           }
-        }),
-      },
-    });
-    addEventListener("callHandler", (rxPayload) => {
-      let payload = rxPayload as RxCallHandler<T>;
-      const raw = payload.callHandler.response;
-
-      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-
-      resolve({
-        ...payload.callHandler,
-        response: parsed,
-      });
-    });
-  });
-}
-
-export function getCurrentTarget(): Promise<DistributionTarget> {
-  return new Promise((resolve) => {
-    postMessage("getCurrentTarget");
-    addEventListener("getCurrentTarget", (rxPayload) => {
-      let payload = rxPayload as RxGetCurrentTarget;
-      resolve(payload.getCurrentTarget.target);
-    });
-  });
-}
-
-export function getConfiguratorDefaultHeight(): Promise<number> {
-  return new Promise((resolve) => {
-    postMessage("getConfiguratorDefaultHeight");
-    addEventListener("getConfiguratorDefaultHeight", (rxPayload) => {
-      let payload = rxPayload as RxGetConfiguratorDefaultHeight;
-      resolve(payload.getConfiguratorDefaultHeight.height);
-    });
-  });
-}
-
-export function setConfiguratorHeight(height_in_px: number) {
-  postMessage({
-    setConfiguratorHeight: {
-      height: height_in_px,
-    },
-  });
-}
-
-export function setError(error: string) {
-  postMessage({
-    error: {
-      message: error,
-    },
-  });
-}
-
-export function saveHandlerArgs(args: Array<string | PluginKey | InstanceKey>) {
-  postMessage({
-    saveHandlerArgs: {
-      handlerArgs: args.map((x) => {
-        if (x instanceof InstanceKey) {
-          return x.into();
-        } else if (x instanceof PluginKey) {
-          return x.into();
-        } else {
-          return x;
         }
-      }),
-    },
-  });
-}
+        return String(arg);
+      })
+      .join(" ");
 
-export function loadHandlerArgs(
-  fn: (handlerArgs: Array<string | PluginKey | InstanceKey>) => void,
-) {
-  addEventListener("loadHandlerArgs", (payload) => {
-    let loadHandlerArgsPayload = payload as RxLoadHandlerArgs;
-    fn(
-      loadHandlerArgsPayload.loadHandlerArgs.handlerArgs.map((x) => {
-        let y = PluginKey.from(x);
-        if (typeof y === "string") {
-          return InstanceKey.from(y);
-        }
-        return y;
-      }),
-    );
-  });
-  postMessage("readyToReceive");
-}
-
-export function pickFile(extensions: string[]): Promise<string | null> {
-  return new Promise((resolve) => {
-    postMessage({
-      pickFile: {
-        extensions,
-      },
-    });
-    addEventListener("filePick", (rxPayload) => {
-      let payload = rxPayload as RxFilePick;
-      resolve(payload.filePick.file);
-    });
-  });
-}
-
-export function pickFiles(extensions: string[]): Promise<string[]> {
-  return new Promise((resolve) => {
-    postMessage({
-      pickFiles: {
-        extensions,
-      },
-    });
-    addEventListener("filesPick", (rxPayload) => {
-      let payload = rxPayload as RxFilesPick;
-      resolve(payload.filesPick.files);
-    });
-  });
-}
-
-export function pickFolder(): Promise<string | null> {
-  return new Promise((resolve) => {
-    postMessage("pickFolder");
-    addEventListener("folderPick", (payload) => {
-      let folderPickPayload = payload as RxFolderPick;
-      resolve(folderPickPayload.folderPick.folder);
-    });
-  });
-}
-
-function addEventListener<T>(
-  eventType: string,
-  fn: (rxPayload: RxPayload<T>) => void,
-) {
-  window.addEventListener("message", (event) => {
-    if (
-      !(
-        event.data.event == eventType ||
-        Object.keys(event.data.event)[0] == eventType
-      )
-    ) {
-      return;
+    switch (level) {
+      case "info":
+      case "debug":
+      case "log": {
+        appPostMessage({
+          consoleLog: {
+            log: formatted,
+          },
+        });
+        break;
+      }
+      case "warn": {
+        appPostMessage({
+          consoleLogWarning: {
+            log: formatted,
+          },
+        });
+        break;
+      }
+      case "error": {
+        appPostMessage({
+          consoleLogError: {
+            log: formatted,
+          },
+        });
+        break;
+      }
     }
-    fn(event.data.event as RxPayload<T>);
-  });
-}
+  };
+});
 
-function postMessage(txPayload: TxPayload) {
-  let message = newMessage(txPayload);
-  window.parent.postMessage(message, "*");
-}
+window.addEventListener("error", (event) => {
+  let formatted = `Uncaught ${event.error?.name ?? "Error"}: ${event.message}\n  at ${event.filename}:${event.lineno}:${event.colno}${event.error?.stack ? "\n" + event.error.stack : ""}`;
+  appPostMessage({
+    consoleLogError: {
+      log: formatted,
+    },
+  });
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  const reason = event.reason;
+  const message =
+    reason instanceof Error
+      ? `Unhandled Promise Rejection: ${reason.name}: ${reason.message}\n${reason.stack ?? ""}`
+      : `Unhandled Promise Rejection: ${String(reason)}`;
+
+  appPostMessage({
+    consoleLogError: {
+      log: message,
+    },
+  });
+});
