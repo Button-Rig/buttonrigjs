@@ -33,17 +33,10 @@ export function callHandler<T>(
     appPostMessage({
       callHandler: {
         handlerArgs: args.map((x) => {
-          if (x instanceof InstanceKey) {
-            return x.into();
-          } else if (x instanceof PluginKey) {
-            return x.into();
-          } else if (x instanceof PluginFileName) {
-            return x.into();
-          } else if (x instanceof InstanceFileName) {
-            return x.into();
-          } else {
-            return x;
+          if (x !== null && typeof x === 'object' && typeof (x as any).into === 'function') {
+            return (x as any).into();
           }
+          return x;
         }),
       },
     });
