@@ -11,8 +11,8 @@ import type {
 import { addAppEventListener, appPostMessage } from "../utils.js";
 
 /**
- * Takes a screenshot, saves it to app data dir and returns the asset url.
- * @returns The image url.
+ * Takes a screenshot.
+ * @returns the png byte array.
  */
 export function takeScreenshot(): Promise<Uint8Array> {
   return new Promise((resolve) => {
