@@ -9,7 +9,11 @@ import type {
   RxCallHandler,
   RxLoadHandlerArgs,
 } from "../types/rxPayload.js";
-import { addAppEventListener, appPostMessage } from "../utils.js";
+import {
+  addAppEventListener,
+  appPostMessage,
+  appPostMessageAndListen,
+} from "../utils.js";
 
 /**
  * You can call your handler cli from within the configurator using this function.
@@ -30,27 +34,34 @@ export function callHandler<T>(
   >,
 ): Promise<CallHandlerResponse<T>> {
   return new Promise((resolve) => {
-    appPostMessage({
-      callHandler: {
-        handlerArgs: args.map((x) => {
-          if (x !== null && typeof x === 'object' && typeof (x as any).into === 'function') {
-            return (x as any).into();
-          }
-          return x;
-        }),
+    appPostMessageAndListen(
+      {
+        callHandler: {
+          handlerArgs: args.map((x) => {
+            if (
+              x !== null &&
+              typeof x === "object" &&
+              typeof (x as any).into === "function"
+            ) {
+              return (x as any).into();
+            }
+            return x;
+          }),
+        },
       },
-    });
-    addAppEventListener("callHandler", (rxPayload) => {
-      let payload = rxPayload as RxCallHandler<T>;
-      const raw = payload.callHandler.response;
+      "callHandler",
+      (rxPayload) => {
+        let payload = rxPayload as RxCallHandler<T>;
+        const raw = payload.callHandler.response;
 
-      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+        const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
 
-      resolve({
-        ...payload.callHandler,
-        response: parsed,
-      });
-    });
+        resolve({
+          ...payload.callHandler,
+          response: parsed,
+        });
+      },
+    );
   });
 }
 
@@ -99,7 +110,7 @@ export function loadHandlerArgs(
     >,
   ) => void,
 ) {
-  addAppEventListener("loadHandlerArgs", (payload) => {
+  addAppEventListener(null, "loadHandlerArgs", (payload) => {
     let loadHandlerArgsPayload = payload as RxLoadHandlerArgs;
     fn(
       loadHandlerArgsPayload.loadHandlerArgs.handlerArgs.map((x) => {

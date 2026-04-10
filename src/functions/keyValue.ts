@@ -2,7 +2,11 @@ import type {
   RxGetInstanceKeyValue,
   RxGetPluginKeyValue,
 } from "../types/rxPayload.js";
-import { addAppEventListener, appPostMessage } from "../utils.js";
+import {
+  addAppEventListener,
+  appPostMessage,
+  appPostMessageAndListen,
+} from "../utils.js";
 
 /**
  * This function can be used to get the plugin level key value that is available to all the instances of this plugin.
@@ -11,24 +15,27 @@ import { addAppEventListener, appPostMessage } from "../utils.js";
  */
 export function getPluginKeyValue<T>(key: string): Promise<T | null> {
   return new Promise((resolve) => {
-    appPostMessage({
-      getPluginKeyValue: {
-        key,
+    appPostMessageAndListen(
+      {
+        getPluginKeyValue: {
+          key,
+        },
       },
-    });
-    addAppEventListener("getPluginKeyValue", (rxPayload) => {
-      let payload = rxPayload as RxGetPluginKeyValue;
-      if (payload.getPluginKeyValue.key == key) {
-        if (
-          payload.getPluginKeyValue.value !== null &&
-          payload.getPluginKeyValue.value !== undefined
-        ) {
-          resolve(JSON.parse(payload.getPluginKeyValue.value) as T);
-        } else {
-          resolve(null);
+      "getPluginKeyValue",
+      (rxPayload) => {
+        let payload = rxPayload as RxGetPluginKeyValue;
+        if (payload.getPluginKeyValue.key == key) {
+          if (
+            payload.getPluginKeyValue.value !== null &&
+            payload.getPluginKeyValue.value !== undefined
+          ) {
+            resolve(JSON.parse(payload.getPluginKeyValue.value) as T);
+          } else {
+            resolve(null);
+          }
         }
-      }
-    });
+      },
+    );
   });
 }
 
@@ -65,25 +72,27 @@ export function removePluginKeyValue(key: string) {
  */
 export function getInstanceKeyValue<T>(key: string): Promise<T | null> {
   return new Promise((resolve) => {
-    appPostMessage({
-      getInstanceKeyValue: {
-        key,
+    appPostMessageAndListen(
+      {
+        getInstanceKeyValue: {
+          key,
+        },
       },
-    });
-
-    addAppEventListener("getInstanceKeyValue", (rxPayload) => {
-      const payload = rxPayload as RxGetInstanceKeyValue;
-      if (payload.getInstanceKeyValue.key == key) {
-        if (
-          payload.getInstanceKeyValue.value !== null &&
-          payload.getInstanceKeyValue.value !== undefined
-        ) {
-          resolve(JSON.parse(payload.getInstanceKeyValue.value) as T);
-        } else {
-          resolve(null);
+      "getInstanceKeyValue",
+      (rxPayload) => {
+        const payload = rxPayload as RxGetInstanceKeyValue;
+        if (payload.getInstanceKeyValue.key == key) {
+          if (
+            payload.getInstanceKeyValue.value !== null &&
+            payload.getInstanceKeyValue.value !== undefined
+          ) {
+            resolve(JSON.parse(payload.getInstanceKeyValue.value) as T);
+          } else {
+            resolve(null);
+          }
         }
-      }
-    });
+      },
+    );
   });
 }
 

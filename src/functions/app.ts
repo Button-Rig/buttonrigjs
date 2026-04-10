@@ -8,7 +8,11 @@ import type {
   RxGetCurrentTarget,
   RxTakeScreenshot,
 } from "../types/rxPayload.js";
-import { addAppEventListener, appPostMessage } from "../utils.js";
+import {
+  addAppEventListener,
+  appPostMessage,
+  appPostMessageAndListen,
+} from "../utils.js";
 
 /**
  * Takes a screenshot.
@@ -16,8 +20,7 @@ import { addAppEventListener, appPostMessage } from "../utils.js";
  */
 export function takeScreenshot(): Promise<Uint8Array> {
   return new Promise((resolve) => {
-    appPostMessage("takeScreenshot");
-    addAppEventListener("takeScreenshot", (rxPayload) => {
+    appPostMessageAndListen("takeScreenshot", "takeScreenshot", (rxPayload) => {
       let payload = rxPayload as RxTakeScreenshot;
       resolve(payload.takeScreenshot.image);
     });
@@ -29,11 +32,14 @@ export function takeScreenshot(): Promise<Uint8Array> {
  */
 export function getCurrentTarget(): Promise<DistributionTarget> {
   return new Promise((resolve) => {
-    appPostMessage("getCurrentTarget");
-    addAppEventListener("getCurrentTarget", (rxPayload) => {
-      let payload = rxPayload as RxGetCurrentTarget;
-      resolve(payload.getCurrentTarget.target);
-    });
+    appPostMessageAndListen(
+      "getCurrentTarget",
+      "getCurrentTarget",
+      (rxPayload) => {
+        let payload = rxPayload as RxGetCurrentTarget;
+        resolve(payload.getCurrentTarget.target);
+      },
+    );
   });
 }
 
@@ -42,11 +48,14 @@ export function getCurrentTarget(): Promise<DistributionTarget> {
  */
 export function getConfiguratorDefaultHeight(): Promise<number> {
   return new Promise((resolve) => {
-    appPostMessage("getConfiguratorDefaultHeight");
-    addAppEventListener("getConfiguratorDefaultHeight", (rxPayload) => {
-      let payload = rxPayload as RxGetConfiguratorDefaultHeight;
-      resolve(payload.getConfiguratorDefaultHeight.height);
-    });
+    appPostMessageAndListen(
+      "getConfiguratorDefaultHeight",
+      "getConfiguratorDefaultHeight",
+      (rxPayload) => {
+        let payload = rxPayload as RxGetConfiguratorDefaultHeight;
+        resolve(payload.getConfiguratorDefaultHeight.height);
+      },
+    );
   });
 }
 
@@ -73,11 +82,14 @@ export function resetConfiguratorHeight() {
  */
 export function getConfiguratorHeight(): Promise<number> {
   return new Promise((resolve) => {
-    appPostMessage("getConfiguratorHeight");
-    addAppEventListener("getConfiguratorHeight", (rxPayload) => {
-      let payload = rxPayload as RxGetConfiguratorHeight;
-      resolve(payload.getConfiguratorHeight.height);
-    });
+    appPostMessageAndListen(
+      "getConfiguratorHeight",
+      "getConfiguratorHeight",
+      (rxPayload) => {
+        let payload = rxPayload as RxGetConfiguratorHeight;
+        resolve(payload.getConfiguratorHeight.height);
+      },
+    );
   });
 }
 
@@ -98,15 +110,18 @@ export function setError(error: string) {
  */
 export function pickFile(extensions: string[]): Promise<string | null> {
   return new Promise((resolve) => {
-    appPostMessage({
-      pickFile: {
-        extensions,
+    appPostMessageAndListen(
+      {
+        pickFile: {
+          extensions,
+        },
       },
-    });
-    addAppEventListener("filePick", (rxPayload) => {
-      let payload = rxPayload as RxFilePick;
-      resolve(payload.filePick.file);
-    });
+      "filePick",
+      (rxPayload) => {
+        let payload = rxPayload as RxFilePick;
+        resolve(payload.filePick.file);
+      },
+    );
   });
 }
 
@@ -116,15 +131,18 @@ export function pickFile(extensions: string[]): Promise<string | null> {
  */
 export function pickFiles(extensions: string[]): Promise<string[]> {
   return new Promise((resolve) => {
-    appPostMessage({
-      pickFiles: {
-        extensions,
+    appPostMessageAndListen(
+      {
+        pickFiles: {
+          extensions,
+        },
       },
-    });
-    addAppEventListener("filesPick", (rxPayload) => {
-      let payload = rxPayload as RxFilesPick;
-      resolve(payload.filesPick.files);
-    });
+      "filesPick",
+      (rxPayload) => {
+        let payload = rxPayload as RxFilesPick;
+        resolve(payload.filesPick.files);
+      },
+    );
   });
 }
 
@@ -133,8 +151,7 @@ export function pickFiles(extensions: string[]): Promise<string[]> {
  */
 export function pickFolder(): Promise<string | null> {
   return new Promise((resolve) => {
-    appPostMessage("pickFolder");
-    addAppEventListener("folderPick", (payload) => {
+    appPostMessageAndListen("pickFolder", "folderPick", (payload) => {
       let folderPickPayload = payload as RxFolderPick;
       resolve(folderPickPayload.folderPick.folder);
     });

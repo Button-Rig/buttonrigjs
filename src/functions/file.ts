@@ -4,7 +4,11 @@ import type {
   RxGetPluginFile,
   RxGetPluginFilePath,
 } from "../main.js";
-import { addAppEventListener, appPostMessage } from "../utils.js";
+import {
+  addAppEventListener,
+  appPostMessage,
+  appPostMessageAndListen,
+} from "../utils.js";
 
 /**
  * The files fetched using this function belongs to the action configurator instance.
@@ -14,18 +18,20 @@ import { addAppEventListener, appPostMessage } from "../utils.js";
  */
 export function getInstanceFile(fileName: string): Promise<Uint8Array> {
   return new Promise((resolve) => {
-    appPostMessage({
-      getInstanceFile: {
-        fileName,
+    appPostMessageAndListen(
+      {
+        getInstanceFile: {
+          fileName,
+        },
       },
-    });
-
-    addAppEventListener("getInstanceFile", (rxPayload) => {
-      let payload = rxPayload as RxGetInstanceFile;
-      if (payload.getInstanceFile.fileName == fileName) {
-        resolve(payload.getInstanceFile.content);
-      }
-    });
+      "getInstanceFile",
+      (rxPayload) => {
+        let payload = rxPayload as RxGetInstanceFile;
+        if (payload.getInstanceFile.fileName == fileName) {
+          resolve(payload.getInstanceFile.content);
+        }
+      },
+    );
   });
 }
 
@@ -37,18 +43,20 @@ export function getInstanceFile(fileName: string): Promise<Uint8Array> {
  */
 export function getPluginFile(fileName: string): Promise<Uint8Array> {
   return new Promise((resolve) => {
-    appPostMessage({
-      getPluginFile: {
-        fileName,
+    appPostMessageAndListen(
+      {
+        getPluginFile: {
+          fileName,
+        },
       },
-    });
-
-    addAppEventListener("getPluginFile", (rxPayload) => {
-      let payload = rxPayload as RxGetPluginFile;
-      if (payload.getPluginFile.fileName == fileName) {
-        resolve(payload.getPluginFile.content);
-      }
-    });
+      "getPluginFile",
+      (rxPayload) => {
+        let payload = rxPayload as RxGetPluginFile;
+        if (payload.getPluginFile.fileName == fileName) {
+          resolve(payload.getPluginFile.content);
+        }
+      },
+    );
   });
 }
 
@@ -60,18 +68,20 @@ export function getPluginFile(fileName: string): Promise<Uint8Array> {
  */
 export function getInstanceFilePath(fileName: string): Promise<string> {
   return new Promise((resolve) => {
-    appPostMessage({
-      getInstanceFilePath: {
-        fileName,
+    appPostMessageAndListen(
+      {
+        getInstanceFilePath: {
+          fileName,
+        },
       },
-    });
-
-    addAppEventListener("getInstanceFilePath", (rxPayload) => {
-      let payload = rxPayload as RxGetInstanceFilePath;
-      if (payload.getInstanceFilePath.fileName == fileName) {
-        resolve(payload.getInstanceFilePath.filePath);
-      }
-    });
+      "getInstanceFilePath",
+      (rxPayload) => {
+        let payload = rxPayload as RxGetInstanceFilePath;
+        if (payload.getInstanceFilePath.fileName == fileName) {
+          resolve(payload.getInstanceFilePath.filePath);
+        }
+      },
+    );
   });
 }
 
@@ -83,18 +93,20 @@ export function getInstanceFilePath(fileName: string): Promise<string> {
  */
 export function getPluginFilePath(fileName: string): Promise<string> {
   return new Promise((resolve) => {
-    appPostMessage({
-      getPluginFilePath: {
-        fileName,
+    appPostMessageAndListen(
+      {
+        getPluginFilePath: {
+          fileName,
+        },
       },
-    });
-
-    addAppEventListener("getPluginFilePath", (rxPayload) => {
-      let payload = rxPayload as RxGetPluginFilePath;
-      if (payload.getPluginFilePath.fileName == fileName) {
-        resolve(payload.getPluginFilePath.filePath);
-      }
-    });
+      "getPluginFilePath",
+      (rxPayload) => {
+        let payload = rxPayload as RxGetPluginFilePath;
+        if (payload.getPluginFilePath.fileName == fileName) {
+          resolve(payload.getPluginFilePath.filePath);
+        }
+      },
+    );
   });
 }
 
