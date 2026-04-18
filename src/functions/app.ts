@@ -1,12 +1,12 @@
-import type {
+import {
   DistributionTarget,
-  RxFilePick,
-  RxFilesPick,
-  RxFolderPick,
-  RxGetConfiguratorDefaultHeight,
-  RxGetConfiguratorHeight,
-  RxGetCurrentTarget,
-  RxTakeScreenshot,
+  type RxFilePick,
+  type RxFilesPick,
+  type RxFolderPick,
+  type RxGetConfiguratorDefaultHeight,
+  type RxGetConfiguratorHeight,
+  type RxGetCurrentTarget,
+  type RxTakeScreenshot,
 } from "../types/rxPayload.js";
 import {
   addAppEventListener,
@@ -156,4 +156,22 @@ export function pickFolder(): Promise<string | null> {
       resolve(folderPickPayload.folderPick.folder);
     });
   });
+}
+
+/**
+ * @returns a file path converted to a asset url.
+ * /path/to/abc is turned to 
+ * http://asset.localhost//path/to/abc in windows 
+ * and
+ * asset://asset.localhost//path/to/abc in linux 
+ */
+export function assetUrl(filePath: string): Promise<string> {
+  return new Promise(async (resolve) => {
+    let target = await getCurrentTarget();
+    if (target == DistributionTarget.Windows_X86_64)  {
+      resolve("http://asset.localhost/" + filePath);
+    } else {
+      resolve("asset://asset.localhost/" + filePath);
+    }
+  })
 }
