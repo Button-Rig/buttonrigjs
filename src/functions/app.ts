@@ -1,3 +1,4 @@
+import type { Grid } from "../main.js";
 import {
   DistributionTarget,
   type RxFilePick,
@@ -6,13 +7,10 @@ import {
   type RxGetConfiguratorDefaultHeight,
   type RxGetConfiguratorHeight,
   type RxGetCurrentTarget,
+  type RxListGrids,
   type RxTakeScreenshot,
 } from "../types/rxPayload.js";
-import {
-  addAppEventListener,
-  appPostMessage,
-  appPostMessageAndListen,
-} from "../utils.js";
+import { appPostMessage, appPostMessageAndListen } from "../utils.js";
 
 /**
  * Takes a screenshot.
@@ -160,18 +158,30 @@ export function pickFolder(): Promise<string | null> {
 
 /**
  * @returns a file path converted to a asset url.
- * /path/to/abc is turned to 
- * http://asset.localhost//path/to/abc in windows 
+ * /path/to/abc is turned to
+ * http://asset.localhost//path/to/abc in windows
  * and
- * asset://asset.localhost//path/to/abc in linux 
+ * asset://asset.localhost//path/to/abc in linux
  */
 export function assetUrl(filePath: string): Promise<string> {
   return new Promise(async (resolve) => {
     let target = await getCurrentTarget();
-    if (target == DistributionTarget.Windows_X86_64)  {
+    if (target == DistributionTarget.Windows_X86_64) {
       resolve("http://asset.localhost/" + filePath);
     } else {
       resolve("asset://asset.localhost/" + filePath);
     }
-  })
+  });
+}
+
+/**
+ * @returns all grids' id and name from the app.
+ */
+export function listGrids(): Promise<Grid[]> {
+  return new Promise(async (resolve) => {
+    appPostMessageAndListen("listGrids", "listGrids", (payload) => {
+      let folderPickPayload = payload as RxListGrids;
+      resolve(folderPickPayload.listGrids.response.grids);
+    });
+  });
 }

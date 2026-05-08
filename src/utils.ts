@@ -1,7 +1,7 @@
 import type { RxPayload } from "./types/rxPayload.js";
 import type { TxPayload } from "./types/txPayload.js";
 import { newMessage } from "./types/utils.js";
-import { v4 } from "uuid";
+import { v4 } from "../node_modules/uuid/dist/index.js";
 
 export function addAppEventListener<T>(
   messageId: string | null,

@@ -1,3 +1,5 @@
+import type { Grid } from "./app.js";
+
 export type RxPayload<T> =
   | RxFilePick
   | RxFilesPick
@@ -14,7 +16,16 @@ export type RxPayload<T> =
   | RxGetInstanceFilePath
   | RxGetPluginFilePath
   | RxTakeScreenshot
+  | RxListGrids
   | null;
+
+export interface RxListGrids {
+  listGrids: {
+    response: {
+      grids: Grid[];
+    };
+  };
+}
 
 export interface RxTakeScreenshot {
   takeScreenshot: {

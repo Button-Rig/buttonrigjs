@@ -9,6 +9,7 @@ export * from "./functions/handler.js";
 export * from "./functions/keyValue.js";
 export * from "./functions/file.js";
 export * from "./utils.js";
+export * from "./types/app.js";
 
 (["log", "warn", "error", "info", "debug"] as const).forEach((level) => {
   const _original = console[level];

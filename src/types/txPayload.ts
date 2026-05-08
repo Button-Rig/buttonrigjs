@@ -30,6 +30,7 @@ export type TxPayload =
   | TxConsoleLogWarning
   | TxConsoleLogError
   | TxTakeScreenshot
+  | TxListGrids
   | ErrorPayload;
 
 export interface TxConsoleLogError {
@@ -177,3 +178,4 @@ export type TxGetConfiguratorDefaultHeight = "getConfiguratorDefaultHeight";
 export type TxGetConfiguratorHeight = "getConfiguratorHeight";
 export type TxResetConfiguratorHeight = "resetConfiguratorHeight";
 export type TxTakeScreenshot = "takeScreenshot";
+export type TxListGrids = "listGrids";
