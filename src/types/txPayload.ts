@@ -1,7 +1,8 @@
 import type { ErrorPayload } from "./utils.js";
 
 export type TxPayload =
-  | TxCallHandler
+  | TxSaveConfig
+  | TxLoadConfig
   | TxSavePluginKeyValue
   | TxRemovePluginKeyValue
   | TxGetPluginKeyValue
@@ -13,8 +14,6 @@ export type TxPayload =
   | TxPickFilePayload
   | TxPickFilesPayload
   | TxPickFolder
-  | TxReadyToReceive
-  | TxSaveHandlerArgsPayload
   | TxGetConfiguratorDefaultHeight
   | TxSavePluginFile
   | TxDeletePluginFile
@@ -147,9 +146,9 @@ export interface TxSavePluginKeyValue {
   };
 }
 
-export interface TxCallHandler {
-  callHandler: {
-    handlerArgs: string[];
+export interface TxSaveConfig {
+  saveConfig: {
+    config: unknown;
   };
 }
 
@@ -165,13 +164,7 @@ export interface TxPickFilesPayload {
   };
 }
 
-export interface TxSaveHandlerArgsPayload {
-  saveHandlerArgs: {
-    handlerArgs: string[];
-  };
-}
-
-export type TxReadyToReceive = "readyToReceive";
+export type TxLoadConfig = "loadConfig";
 export type TxPickFolder = "pickFolder";
 export type TxGetCurrentTarget = "getCurrentTarget";
 export type TxGetConfiguratorDefaultHeight = "getConfiguratorDefaultHeight";

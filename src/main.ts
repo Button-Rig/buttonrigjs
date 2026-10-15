@@ -1,11 +1,12 @@
 import { appPostMessage } from "./utils.js";
 
-export * from "./types/handler.js";
+export * from "./types/placeholder.js";
 export * from "./types/rxPayload.js";
 export * from "./types/txPayload.js";
 export * from "./types/utils.js";
 export * from "./functions/app.js";
-export * from "./functions/handler.js";
+export * from "./functions/config.js";
+export * from "./functions/server.js";
 export * from "./functions/keyValue.js";
 export * from "./functions/file.js";
 export * from "./utils.js";

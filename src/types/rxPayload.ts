@@ -4,8 +4,8 @@ export type RxPayload<T> =
   | RxFilePick
   | RxFilesPick
   | RxFolderPick
-  | RxLoadHandlerArgs
-  | RxCallHandler<T>
+  | RxLoadConfig<T>
+  | RxConfigChanged<T>
   | RxGetPluginKeyValue
   | RxGetInstanceKeyValue
   | RxGetCurrentTarget
@@ -98,18 +98,17 @@ export interface RxGetPluginKeyValue {
   };
 }
 
-export interface CallHandlerResponse<T> {
-  response: T;
-  exitCode: number | null;
+/** Answer to `"loadConfig"`; `config` is `null` for a new instance. */
+export interface RxLoadConfig<T> {
+  loadConfig: {
+    config: T | null;
+  };
 }
 
-export interface RxCallHandler<T> {
-  callHandler: CallHandlerResponse<T>;
-}
-
-export interface RxLoadHandlerArgs {
-  loadHandlerArgs: {
-    handlerArgs: string[];
+/** Pushed by the app when the instance's config changes (e.g. to a widget preview). */
+export interface RxConfigChanged<T> {
+  configChanged: {
+    config: T | null;
   };
 }
 
