@@ -92,9 +92,9 @@ export function getConfiguratorHeight(): Promise<number> {
 }
 
 /**
- * Sets and error message at the footer of the configurator.
+ * Sets an error message at the footer of the configurator. `null` clears it.
  */
-export function setError(error: string) {
+export function setError(error: string | null) {
   appPostMessage({
     error: {
       message: error,
