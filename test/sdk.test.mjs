@@ -211,3 +211,97 @@ test("apiSocket opens ws(s)://<host>/api<path>", () => {
     ["wss://example.test/api/s"],
   ]);
 });
+
+// ---- widget APIs (2.1) ------------------------------------------------------------------------
+
+import {
+  getWidgetContext,
+  onResize,
+  onWidgetContextChange,
+} from "../dist/functions/widget.js";
+
+const context = (columns, rows, mode = "grid") => ({
+  instanceId: "button-plugin-action-1",
+  buttonId: 4,
+  span: { columns, rows },
+  mode,
+});
+
+test("getWidgetContext sends \"getWidgetContext\" and resolves the answer with the same messageId", async () => {
+  const { posted, deliver } = installFakeWindow();
+  const promise = getWidgetContext();
+  assert.equal(posted.length, 1);
+  const { message } = posted[0];
+  assert.equal(message.payload, "getWidgetContext");
+  assert.equal(message.buttonPluginActionId, "button-plugin-action-1");
+  // Another request's answer and a foreign source are ignored.
+  deliver({ messageId: "other", event: { getWidgetContext: { context: context(9, 9) } } });
+  deliver({ messageId: message.messageId, event: { getWidgetContext: { context: context(8, 8) } } }, {});
+  deliver({ messageId: message.messageId, event: { getWidgetContext: { context: context(2, 1) } } });
+  assert.deepEqual(await promise, context(2, 1));
+});
+
+test("getWidgetContext resolves null outside the app", async () => {
+  globalThis.window = { name: "", parent: undefined };
+  globalThis.window.parent = globalThis.window;
+  assert.equal(await getWidgetContext(), null);
+});
+
+test("onWidgetContextChange gets widgetContextChanged pushes with any messageId", () => {
+  const { deliver, listeners } = installFakeWindow();
+  const seen = [];
+  const stop = onWidgetContextChange((x) => seen.push(x));
+  deliver({ messageId: "a", event: { widgetContextChanged: { context: context(3, 2) } } });
+  deliver({ messageId: "b", event: { configChanged: { config: {} } } });
+  assert.deepEqual(seen, [context(3, 2)]);
+  stop();
+  assert.equal(listeners.size, 0);
+});
+
+test("onResize reports size, aspect, area and the span (also after a span change)", async () => {
+  const { posted, deliver } = installFakeWindow();
+  const element = { clientWidth: 200, clientHeight: 100 };
+  globalThis.document = { documentElement: element };
+  let observerCallback;
+  let observed;
+  let disconnected = false;
+  globalThis.ResizeObserver = class {
+    constructor(cb) {
+      observerCallback = cb;
+    }
+    observe(x) {
+      observed = x;
+    }
+    disconnect() {
+      disconnected = true;
+    }
+  };
+  try {
+    const sizes = [];
+    const stop = onResize((x) => sizes.push(x));
+    assert.equal(observed, element);
+    assert.deepEqual(sizes[0], { width: 200, height: 100, aspect: 2, area: 20000, span: null });
+
+    const request = posted.find((x) => x.message.payload === "getWidgetContext").message;
+    deliver({ messageId: request.messageId, event: { getWidgetContext: { context: context(2, 1) } } });
+    await new Promise((r) => setTimeout(r, 0));
+    assert.deepEqual(sizes.at(-1).span, { columns: 2, rows: 1 });
+
+    element.clientWidth = 50;
+    element.clientHeight = 100;
+    observerCallback([]);
+    assert.deepEqual(sizes.at(-1), { width: 50, height: 100, aspect: 0.5, area: 5000, span: { columns: 2, rows: 1 } });
+
+    deliver({ messageId: "x", event: { widgetContextChanged: { context: context(1, 1) } } });
+    assert.deepEqual(sizes.at(-1).span, { columns: 1, rows: 1 });
+
+    stop();
+    assert.ok(disconnected);
+    const count = sizes.length;
+    observerCallback([]);
+    assert.equal(sizes.length, count);
+  } finally {
+    delete globalThis.document;
+    delete globalThis.ResizeObserver;
+  }
+});

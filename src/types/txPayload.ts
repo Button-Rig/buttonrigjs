@@ -30,6 +30,7 @@ export type TxPayload =
   | TxConsoleLogError
   | TxTakeScreenshot
   | TxListGrids
+  | TxGetWidgetContext
   | ErrorPayload;
 
 export interface TxConsoleLogError {
@@ -165,6 +166,7 @@ export interface TxPickFilesPayload {
 }
 
 export type TxLoadConfig = "loadConfig";
+export type TxGetWidgetContext = "getWidgetContext";
 export type TxPickFolder = "pickFolder";
 export type TxGetCurrentTarget = "getCurrentTarget";
 export type TxGetConfiguratorDefaultHeight = "getConfiguratorDefaultHeight";

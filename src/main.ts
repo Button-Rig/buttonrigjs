@@ -7,6 +7,7 @@ export * from "./types/utils.js";
 export * from "./functions/app.js";
 export * from "./functions/config.js";
 export * from "./functions/server.js";
+export * from "./functions/widget.js";
 export * from "./functions/keyValue.js";
 export * from "./functions/file.js";
 export * from "./utils.js";
