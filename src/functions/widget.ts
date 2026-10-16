@@ -4,7 +4,12 @@ import type {
   WidgetContext,
   WidgetSpan,
 } from "../types/rxPayload.js";
-import { addAppEventListener, appPostMessageAndListen, isHosted } from "../utils.js";
+import {
+  addAppEventListener,
+  appPostMessage,
+  appPostMessageAndListen,
+  isHosted,
+} from "../utils.js";
 
 /** Size of the widget page, reported by `onResize`. */
 export interface WidgetSize {
@@ -105,4 +110,26 @@ export function onResize(fn: (size: WidgetSize) => void): () => void {
     observer?.disconnect();
     stopContext();
   };
+}
+
+let readySent = false;
+
+/**
+ * Tells the app that the widget has rendered its first real frame (live data, or the last
+ * data it cached). Until then the app keeps the widget's iframe invisible behind a placeholder
+ * (a snapshot of the last frame, if it has one) and fades the iframe in when it gets this
+ * message, so the user never sees a blank or half-built page.
+ *
+ * Call it once, after the first paint of meaningful content; calling it again does nothing.
+ * It is not sent automatically. A widget that never calls it is revealed by the app after a
+ * timeout (about 2 seconds), so older pages and pages without the call still work.
+ *
+ * Does nothing outside the app.
+ */
+export function widgetReady(): void {
+  if (readySent || !isHosted()) {
+    return;
+  }
+  readySent = true;
+  appPostMessage("widgetReady");
 }

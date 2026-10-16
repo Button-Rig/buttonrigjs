@@ -305,3 +305,17 @@ test("onResize reports size, aspect, area and the span (also after a span change
     delete globalThis.ResizeObserver;
   }
 });
+
+import { widgetReady } from "../dist/functions/widget.js";
+
+test("widgetReady posts \"widgetReady\" once and nothing outside the app", () => {
+  globalThis.window = { name: "", parent: undefined };
+  globalThis.window.parent = globalThis.window;
+  widgetReady(); // not hosted: no post, and it must not use up the one-shot
+  const { posted } = installFakeWindow();
+  widgetReady();
+  widgetReady();
+  assert.equal(posted.length, 1);
+  assert.equal(posted[0].message.payload, "widgetReady");
+  assert.equal(posted[0].message.buttonPluginActionId, "button-plugin-action-1");
+});
