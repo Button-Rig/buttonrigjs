@@ -1,11 +1,11 @@
 # AGENTS.md: buttonrigjs
 
-The `buttonrig` npm package (currently 2.1.0, TypeScript, ESM): the SDK that plugin pages (configurators and widget pages) use to talk to the Button Rig app and to their own plugin server. It talks to the app over the iframe `postMessage` bridge and to the plugin server through the app-run web origin (`api(path)`, `apiSocket(path)`). Work happens on branch `feature/widgets`. 2.x is not published to npm yet.
+The `buttonrig` npm package (currently 2.1.0, TypeScript, ESM): the SDK that plugin pages (configurators and widget pages) use to talk to the Button Rig app and to their own plugin server. It talks to the app over the iframe `postMessage` bridge and to the plugin server through the app-run web origin (`api(path)`, `apiSocket(path)`). Work happens on branch `main`. 2.x is not published to npm yet.
 
 ## How it fits
 - Wire format is defined by the app: `app/buttonrig-ui/src/utils/plugin/{rx,tx}_post_message.rs`, `widget_frames.rs`; protocol summary in `app/AGENTS.md` ("postMessage protocol"). SDK message types: `src/types/{rxPayload,txPayload}.ts`. Changing a message needs the app and the SDK changed together.
 - Consumers: every plugin in `plugins/` (`"buttonrig": "file:../../../../buttonrigjs"` until published; they need `dist/` built, so run `npm run build` here first).
-- Docs: `docs.buttonrig.com/content/1. plugins/3. SDK Reference/` has one page per function. Any public API change must update the matching page and `plugins/instructions.md` section 6.
+- Docs: `docs.buttonrig.com/content/1. plugins/3. SDK Reference/` has one page per function. Any public API change must update the matching page and the "SDK reference" section of `plugins/AGENTS.md` (Plugin authoring guide).
 
 ## Layout
 - `src/main.ts`: public exports. `src/utils.ts`: shared helpers.
@@ -24,5 +24,5 @@ The `buttonrig` npm package (currently 2.1.0, TypeScript, ESM): the SDK that plu
 - Behaviour must also work outside an iframe where documented (`loadConfig` resolves `null` when the page is not framed).
 - Keep new APIs additive within 2.x; breaking changes need a major bump. New widget APIs are marked "available from `buttonrig` 2.1" in the docs.
 - Add a unit test in `test/sdk.test.mjs` for new wire formats.
-- Changing public behaviour: update `docs.buttonrig.com` SDK Reference (and its `Widget`/`Config` topic pages), `plugins/instructions.md`, and the app side of the protocol if a message changes.
+- Changing public behaviour: update `docs.buttonrig.com` SDK Reference (and its `Widget`/`Config` topic pages), `plugins/AGENTS.md` (Plugin authoring guide), and the app side of the protocol if a message changes.
 - Commit style: short subject, optional `SDK 2.1:` prefix for release-scoped features (`SDK 2.1: widget APIs getWidgetContext, onWidgetContextChange, onResize`). Stage explicit paths; never `git commit -a`.
