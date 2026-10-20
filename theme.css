@@ -190,7 +190,12 @@ html[data-br-theme-pending] { visibility: hidden; }
 
 /* Button Rig components for plugin configurator and styler pages (plugin-facing, not the app
    UI). Served as part of /__buttonrig/theme.css after the token block of buttonrig-ui/style.css
-   and the font faces. Class names are a plugin contract: add, don't rename. */
+   and the font faces. Class names are a plugin contract: add, don't rename.
+
+   Layout contract: the app pads the frame (action card body, editor inspector), so pages add
+   no outer padding of their own. The body keeps 2px so focus rings at the edges stay visible.
+   Pages are fluid: an action configurator is as wide as the run sequence card, a widget
+   configurator or styler is 300px wide minus the inspector padding. */
 
 html,
 body {
@@ -199,6 +204,11 @@ body {
   color: var(--br-text);
   font-family: var(--br-font);
   font-size: var(--br-fs-body);
+  line-height: 1.35;
+}
+
+body {
+  padding: 2px;
 }
 
 *,
@@ -211,17 +221,45 @@ body {
 .br-stack {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
-/* A label on the left, the control on the right. */
+/* A label on the left, the control on the right:
+   <div class="br-row"><label for="u">Website URL</label><input id="u" class="br-field"></div> */
 .br-row {
   display: grid;
   grid-template-columns: 120px minmax(0, 1fr);
   gap: 6px 12px;
   align-items: center;
+  min-height: var(--br-h-input);
   font-size: var(--br-fs-small);
   color: var(--br-text-3);
+}
+
+/* The 300px inspector (widget configurators and stylers). */
+@media (max-width: 320px) {
+  .br-row {
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 6px 8px;
+  }
+}
+
+/* Spans both columns of a .br-row (a wide control under its label, a hint). */
+.br-row > .br-full {
+  grid-column: 1 / -1;
+}
+
+/* Controls side by side: <div class="br-inline"><input class="br-field"><button class="br-btn">…</button></div> */
+.br-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.br-grow {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .br-card {
@@ -234,8 +272,26 @@ body {
 .br-divider {
   height: 1px;
   border: 0;
-  margin: 6px 0;
+  margin: 4px 0;
   background: var(--br-border-soft);
+}
+
+/* Section heading inside a page: <div class="br-section">Display</div> */
+.br-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: var(--br-fs-label);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--br-text-4);
+}
+
+.br-section:first-child {
+  margin-top: 0;
 }
 
 /* Text */
@@ -245,6 +301,11 @@ body {
   letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--br-text-4);
+}
+
+.br-text {
+  font-size: var(--br-fs-small);
+  color: var(--br-text-2);
 }
 
 .br-hint {
@@ -257,14 +318,26 @@ body {
   color: var(--br-danger);
 }
 
+.br-ok-text {
+  font-size: var(--br-fs-caption);
+  color: var(--br-ok);
+}
+
 .br-mono {
   font-family: var(--br-font-mono);
+}
+
+.br-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 a,
 .br-link {
   color: var(--br-accent);
   text-decoration: none;
+  cursor: pointer;
 }
 
 a:hover,
@@ -272,9 +345,17 @@ a:hover,
   color: var(--br-accent-hover);
 }
 
+button.br-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+}
+
 /* Inputs: <input class="br-field">, <select class="br-field">, <textarea class="br-field"> */
 .br-field {
   width: 100%;
+  min-width: 0;
   height: var(--br-h-input);
   padding: 0 8px;
   border: 1px solid var(--br-border-input);
@@ -286,6 +367,12 @@ a:hover,
   outline: none;
 }
 
+input[type="number"].br-field {
+  font-family: var(--br-font-mono);
+  font-size: var(--br-fs-small);
+  font-weight: 500;
+}
+
 textarea.br-field {
   height: auto;
   min-height: 64px;
@@ -293,8 +380,27 @@ textarea.br-field {
   resize: vertical;
 }
 
+select.br-field {
+  appearance: none;
+  padding-right: 26px;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237C8390' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  background-size: 14px 14px;
+}
+
+/* Native popups (WebKitGTK/WebView2 ignore color-scheme for some of them). */
+select.br-field option,
+select.br-field optgroup {
+  background: var(--br-panel);
+  color: var(--br-text);
+}
+
 .br-field::placeholder {
   color: var(--br-text-5);
+  opacity: 1;
 }
 
 .br-field:focus {
@@ -308,9 +414,119 @@ textarea.br-field {
   box-shadow: 0 0 0 2px var(--br-danger-ring);
 }
 
+.br-field:disabled,
+.br-field[readonly] {
+  color: var(--br-text-4);
+}
+
 .br-field:disabled {
-  color: var(--br-text-6);
   cursor: not-allowed;
+}
+
+/* A number with a unit: <label class="br-num"><input type="number" value="1000"><span>ms</span></label> */
+.br-num {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  height: var(--br-h-input);
+  padding: 0 8px;
+  border: 1px solid var(--br-border-input);
+  border-radius: var(--br-r);
+  background: var(--br-bg-stage);
+  color: var(--br-text);
+  font: 500 var(--br-fs-small) var(--br-font-mono);
+}
+
+.br-num:focus-within {
+  border-color: var(--br-accent);
+  box-shadow: 0 0 0 2px var(--br-focus-ring);
+}
+
+.br-num > input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+/* The unit replaces the spinner (arrow keys and the wheel still step). */
+.br-num > input::-webkit-inner-spin-button,
+.br-num > input::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.br-num > input {
+  -moz-appearance: textfield;
+}
+
+.br-num > span {
+  flex: none;
+  color: var(--br-text-5);
+  font-family: var(--br-font);
+  font-size: var(--br-fs-micro);
+}
+
+/* A colour with its hex value:
+   <label class="br-color"><input type="color" value="#120a1f"><input value="#120A1F"></label>
+   (the second input is optional; a <span> works for read-only text). */
+.br-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  height: var(--br-h-input);
+  padding: 0 8px 0 5px;
+  border: 1px solid var(--br-border-input);
+  border-radius: var(--br-r);
+  background: var(--br-bg-stage);
+  color: var(--br-text);
+  font: 500 var(--br-fs-small) var(--br-font-mono);
+}
+
+.br-color:focus-within {
+  border-color: var(--br-accent);
+  box-shadow: 0 0 0 2px var(--br-focus-ring);
+}
+
+.br-color > input[type="color"] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--br-border-strong);
+  border-radius: var(--br-r-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.br-color > input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.br-color > input[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: 3px;
+}
+
+.br-color > input:not([type="color"]) {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
 }
 
 input[type="checkbox"].br-check,
@@ -321,8 +537,77 @@ input[type="radio"].br-check {
   accent-color: var(--br-accent);
 }
 
+/* A checkbox with its text: <label class="br-choice"><input type="checkbox" class="br-check"> Text</label> */
+.br-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+  font-size: var(--br-fs-small);
+  color: var(--br-text-2);
+  cursor: pointer;
+}
+
+/* Switch: <input type="checkbox" class="br-toggle" role="switch"> */
+input[type="checkbox"].br-toggle {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 30px;
+  height: 18px;
+  margin: 0;
+  border-radius: 9px;
+  background: var(--br-border-strong);
+  cursor: pointer;
+  outline: none;
+  transition: background-color .12s;
+}
+
+input[type="checkbox"].br-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--br-text-3);
+  transition: left .12s, background-color .12s;
+}
+
+input[type="checkbox"].br-toggle:checked {
+  background: var(--br-accent);
+}
+
+input[type="checkbox"].br-toggle:checked::after {
+  left: 14px;
+  background: var(--br-on-accent);
+}
+
+input[type="checkbox"].br-toggle:focus-visible {
+  box-shadow: 0 0 0 2px var(--br-focus-ring);
+}
+
+input[type="checkbox"].br-toggle:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* A switch row: <label class="br-switch-row"><span>Show peak meter</span><input type="checkbox" class="br-toggle"></label> */
+.br-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--br-h-input);
+  font-size: var(--br-fs-small);
+  color: var(--br-text-2);
+  cursor: pointer;
+}
+
 input[type="range"].br-range {
   width: 100%;
+  margin: 0;
   accent-color: var(--br-accent);
 }
 
@@ -339,7 +624,10 @@ input[type="range"].br-range {
   font-weight: 500;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  flex: none;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -355,6 +643,12 @@ input[type="range"].br-range {
 .br-btn:disabled {
   color: var(--br-text-6);
   cursor: not-allowed;
+}
+
+.br-btn-sm {
+  height: var(--br-h-input);
+  padding: 0 10px;
+  font-size: var(--br-fs-small);
 }
 
 .br-btn-primary {
@@ -384,14 +678,64 @@ input[type="range"].br-range {
   color: var(--br-danger);
 }
 
+/* Square icon button (remove, add, move): <button class="br-icon-btn" aria-label="Remove">✕</button> */
+.br-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--br-r-sm);
+  background: transparent;
+  color: var(--br-text-4);
+  font: inherit;
+  cursor: pointer;
+}
+
+.br-icon-btn:hover {
+  background: var(--br-row);
+  color: var(--br-text);
+}
+
+.br-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--br-focus-ring);
+}
+
+.br-icon-btn:disabled {
+  color: var(--br-text-6);
+  cursor: not-allowed;
+}
+
+.br-icon-btn svg {
+  width: var(--br-icon-sm);
+  height: var(--br-icon-sm);
+}
+
 /* Segmented control: <div class="br-seg"><button class="br-on">A</button><button>B</button></div> */
 .br-seg {
   display: inline-flex;
+  max-width: 100%;
   padding: 2px;
   gap: 2px;
   border: 1px solid var(--br-border-input);
   border-radius: var(--br-r-md);
   background: var(--br-bg-stage);
+}
+
+/* Full width, items share it. */
+.br-seg.br-seg-fill {
+  display: flex;
+  width: 100%;
+}
+
+.br-seg.br-seg-fill > button {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 6px;
 }
 
 .br-seg > button {
@@ -404,13 +748,25 @@ input[type="range"].br-range {
   font: inherit;
   font-size: var(--br-fs-small);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
+}
+
+.br-seg > button:hover {
+  color: var(--br-text);
 }
 
 .br-seg > button.br-on,
 .br-seg > button[aria-pressed="true"] {
   background: var(--br-row-active);
   color: var(--br-text-strong);
+}
+
+.br-seg > button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--br-focus-ring);
 }
 
 /* Key chip */
@@ -424,6 +780,46 @@ input[type="range"].br-range {
   background: var(--br-row);
   color: var(--br-text-2);
   font: 500 var(--br-fs-kbd) var(--br-font-mono);
+}
+
+/* List of items (a bordered box of rows):
+   <div class="br-list"><div class="br-list-row"><span class="br-grow">Item</span><button class="br-icon-btn">✕</button></div></div> */
+.br-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--br-border-input);
+  border-radius: var(--br-r);
+  background: var(--br-bg-stage);
+  overflow: hidden;
+}
+
+.br-list-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--br-h-row);
+  padding: 2px 4px 2px 8px;
+  font-size: var(--br-fs-small);
+  color: var(--br-text-2);
+}
+
+.br-list-row + .br-list-row {
+  border-top: 1px solid var(--br-border-soft);
+}
+
+.br-list-row:hover {
+  background: var(--br-row);
+}
+
+.br-list-row.br-on {
+  background: var(--br-row-active);
+}
+
+.br-empty {
+  padding: 10px;
+  text-align: center;
+  font-size: var(--br-fs-caption);
+  color: var(--br-text-4);
 }
 
 /* Banners */
@@ -440,4 +836,66 @@ input[type="range"].br-range {
   border-color: var(--br-danger-bd);
   background: var(--br-danger-bg);
   color: var(--br-danger);
+}
+
+/* Preset swatches (stylers): <div class="br-swatches"><button class="br-swatch br-on"><span style="background:#120A1F">Aa</span>Neon</button>…</div> */
+.br-swatches {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.br-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--br-text-3);
+  font: inherit;
+  font-size: var(--br-fs-label);
+  cursor: pointer;
+}
+
+.br-swatch > span:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 46px;
+  border: 2px solid transparent;
+  border-radius: var(--br-r);
+  box-shadow: inset 0 0 0 1px var(--br-border);
+  font: 700 var(--br-fs-body) var(--br-font-mono);
+}
+
+.br-swatch:hover > span:first-child {
+  border-color: var(--br-border-strong);
+}
+
+.br-swatch.br-on,
+.br-swatch[aria-pressed="true"] {
+  color: var(--br-text);
+}
+
+.br-swatch.br-on > span:first-child,
+.br-swatch[aria-pressed="true"] > span:first-child {
+  border-color: var(--br-accent);
+}
+
+.br-swatch:focus-visible {
+  outline: none;
+}
+
+.br-swatch:focus-visible > span:first-child {
+  box-shadow: 0 0 0 2px var(--br-focus-ring);
+}
+
+/* Scrollbars inside configurators */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--br-border-strong) transparent;
 }
