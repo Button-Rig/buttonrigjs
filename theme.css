@@ -92,47 +92,47 @@
   --br-focus-ring:    rgba(242, 181, 68, .18);
 }
 
-/* Light: the same roles on paper-white surfaces. The accent is a darker amber so outlines and
-   links keep contrast on white; filled accent buttons keep dark text. */
+/* Light: the same roles on white chrome over a cool grey canvas; filled accent buttons keep
+   dark text. */
 :root[data-br-theme="light"] {
   color-scheme: light;
 
-  /* Surfaces */
-  --br-bg:            #F3F4F6;
-  --br-bg-deep:       #E6E8EC;
+  /* Surfaces: white chrome over a cool grey canvas; the deck sits one step darker. */
+  --br-bg:            #F3F4F7;
+  --br-bg-deep:       #E3E6EB;
   --br-bg-stage:      #FFFFFF;
-  --br-panel:         #FAFAFB;
-  --br-panel-raised:  #F6F7F9;
-  --br-row:           #ECEEF1;
-  --br-row-active:    #E2E5EA;
-  --br-border:        #DDE0E5;
-  --br-border-soft:   #E7E9ED;
-  --br-border-input:  #CDD1D8;
-  --br-border-strong: #BCC1C9;
+  --br-panel:         #FFFFFF;
+  --br-panel-raised:  #F8F9FB;
+  --br-row:           #EEF0F3;
+  --br-row-active:    #E4E7EC;
+  --br-border:        #DFE2E7;
+  --br-border-soft:   #ECEEF1;
+  --br-border-input:  #CCD1D9;
+  --br-border-strong: #B9BFC8;
 
   /* Text */
-  --br-text:          #1C1F24;
-  --br-text-strong:   #0E1013;
-  --br-text-2:        #2C3038;
-  --br-text-3:        #545B66;
-  --br-text-4:        #67707C;
-  --br-text-5:        #858C97;
-  --br-text-6:        #ADB2BA;
+  --br-text:          #1B1E23;
+  --br-text-strong:   #0D0F12;
+  --br-text-2:        #2A2E35;
+  --br-text-3:        #505763;
+  --br-text-4:        #636B77;
+  --br-text-5:        #7F8692;
+  --br-text-6:        #A9AEB7;
 
-  /* Accent */
-  --br-accent:        #D99A22;
-  --br-accent-hover:  #E6A930;
+  /* Accent: the logo amber for fills; outlines and links still read on white. */
+  --br-accent:        #EBA42A;
+  --br-accent-hover:  #F4B33F;
   --br-on-accent:     #1A1300;
-  --br-accent-dim-bg: #FDF3DC;
-  --br-accent-dim-bd: #EED59B;
+  --br-accent-dim-bg: #FEF5E1;
+  --br-accent-dim-bd: #F1D394;
 
   /* States */
-  --br-ok:            #1E9E3E;
+  --br-ok:            #1A9A3A;
   --br-danger:        #C2352F;
   --br-danger-bd:     #F0B9B5;
   --br-danger-bg:     #FDECEB;
   --br-danger-ring:   rgba(194, 53, 47, .16);
-  --br-focus-ring:    rgba(217, 154, 34, .25);
+  --br-focus-ring:    rgba(235, 164, 42, .28);
 }
 
 /* Hidden until configurator.js knows the theme (no dark flash in the light theme). */
