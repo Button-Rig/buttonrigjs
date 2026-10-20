@@ -103,6 +103,22 @@ export function setError(error: string | null) {
 }
 
 /**
+ * Sets the one-line summary of this action, shown on its collapsed card in the button editor
+ * (e.g. `"Opens github.com"`). The app stores it with the action, so call it whenever the
+ * config changes, also right after `loadConfig` resolved. `null` clears it (the card then
+ * shows the action's name only).
+ *
+ * Available from `buttonrig` 2.2; older apps ignore it.
+ */
+export function setSummary(text: string | null) {
+  appPostMessage({
+    summary: {
+      text: text === null || text.trim() === "" ? null : text,
+    },
+  });
+}
+
+/**
  * @param extensions - Eg: ["png", "jpg"]
  * @returns file path if a file is picked.
  */

@@ -319,3 +319,114 @@ test("widgetReady posts \"widgetReady\" once and nothing outside the app", () =>
   assert.equal(posted[0].message.payload, "widgetReady");
   assert.equal(posted[0].message.buttonPluginActionId, "button-plugin-action-1");
 });
+
+// ---- 2.2: summary, widget style, theme -------------------------------------------------------
+
+import { setSummary } from "../dist/functions/app.js";
+import { loadStyle, onStyleChange, saveStyle } from "../dist/functions/style.js";
+import { getTheme, onThemeChange } from "../dist/functions/theme.js";
+
+test("setSummary posts { summary: { text } }; null and blank clear it", () => {
+  const { posted } = installFakeWindow();
+  setSummary("Opens github.com");
+  setSummary(null);
+  setSummary("  ");
+  assert.deepEqual(
+    posted.map((x) => x.message.payload),
+    [{ summary: { text: "Opens github.com" } }, { summary: { text: null } }, { summary: { text: null } }],
+  );
+  assert.equal(posted[0].message.buttonPluginActionId, "button-plugin-action-1");
+});
+
+test("loadStyle sends \"loadStyle\" and resolves the answer with the same messageId", async () => {
+  const { posted, deliver, listeners } = installFakeWindow();
+  const promise = loadStyle();
+  assert.equal(posted[0].message.payload, "loadStyle");
+  const messageId = posted[0].message.messageId;
+  deliver({ messageId: "other", event: { loadStyle: { style: { theme: "wrong" } } } });
+  deliver({ messageId, event: { loadStyle: { style: { theme: "wrong" } } } }, {});
+  deliver({ messageId, event: { loadStyle: { style: { theme: "neon" } } } });
+  assert.deepEqual(await promise, { theme: "neon" });
+  assert.equal(listeners.size, 0);
+});
+
+test("loadStyle resolves {} for nothing saved, null outside the app and null after 1 s without an answer", async () => {
+  const { posted, deliver } = installFakeWindow();
+  const empty = loadStyle();
+  deliver({ messageId: posted[0].message.messageId, event: { loadStyle: { style: {} } } });
+  assert.deepEqual(await empty, {});
+
+  const started = Date.now();
+  const silent = loadStyle();
+  assert.equal(await silent, null);
+  assert.ok(Date.now() - started >= 900, "waited about a second");
+  // A late answer after the timeout is ignored.
+  deliver({ messageId: posted[1].message.messageId, event: { loadStyle: { style: { late: 1 } } } });
+
+  globalThis.window = { parent: null };
+  globalThis.window.parent = globalThis.window;
+  assert.equal(await loadStyle(), null);
+});
+
+test("saveStyle posts { saveStyle: { style } } as plain JSON", () => {
+  const { posted } = installFakeWindow();
+  saveStyle({ theme: "neon", accent: "#fff", dropped: undefined });
+  assert.deepEqual(posted[0].message.payload, { saveStyle: { style: { theme: "neon", accent: "#fff" } } });
+});
+
+test("onStyleChange receives styleChanged pushes until unsubscribed", () => {
+  const { deliver, listeners } = installFakeWindow();
+  const seen = [];
+  const stop = onStyleChange((x) => seen.push(x));
+  deliver({ messageId: "a", event: { styleChanged: { style: { theme: "neon" } } } });
+  deliver({ messageId: "b", event: { configChanged: { config: {} } } });
+  stop();
+  deliver({ messageId: "c", event: { styleChanged: { style: { theme: "x" } } } });
+  assert.deepEqual(seen, [{ theme: "neon" }]);
+  assert.equal(listeners.size, 0);
+});
+
+test("getTheme sends \"getTheme\" and resolves dark or light", async () => {
+  const { posted, deliver } = installFakeWindow();
+  const promise = getTheme();
+  assert.equal(posted[0].message.payload, "getTheme");
+  deliver({ messageId: posted[0].message.messageId, event: { getTheme: { theme: "light" } } });
+  assert.equal(await promise, "light");
+
+  const silent = getTheme();
+  assert.equal(await silent, "dark", "no answer: the page's theme (dark)");
+
+  globalThis.window = { parent: null };
+  globalThis.window.parent = globalThis.window;
+  globalThis.document = { documentElement: { getAttribute: () => "light" } };
+  try {
+    assert.equal(await getTheme(), "light");
+  } finally {
+    delete globalThis.document;
+  }
+});
+
+test("onThemeChange receives themeChanged pushes", () => {
+  const { deliver, listeners } = installFakeWindow();
+  const seen = [];
+  const stop = onThemeChange((x) => seen.push(x));
+  deliver({ messageId: "a", event: { themeChanged: { theme: "light" } } });
+  deliver({ messageId: "b", event: { themeChanged: { theme: "dark" } } });
+  stop();
+  assert.deepEqual(seen, ["light", "dark"]);
+  assert.equal(listeners.size, 0);
+});
+
+import { existsSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+test("theme.css matches the app (scripts/sync-theme.sh --check), when the app checkout is there", (t) => {
+  const root = fileURLToPath(new URL("..", import.meta.url));
+  const app = process.env.BUTTONRIG_APP_DIR ?? `${root}../app`;
+  if (!existsSync(`${app}/buttonrig-ui/style.css`)) {
+    t.skip("no app checkout");
+    return;
+  }
+  execFileSync("bash", [`${root}scripts/sync-theme.sh`, "--check", app], { stdio: "pipe" });
+});

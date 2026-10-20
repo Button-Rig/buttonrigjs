@@ -32,7 +32,26 @@ export type TxPayload =
   | TxListGrids
   | TxGetWidgetContext
   | TxWidgetReady
+  | TxSetSummary
+  | TxLoadStyle
+  | TxSaveStyle
+  | TxGetTheme
   | ErrorPayload;
+
+export interface TxSetSummary {
+  summary: {
+    text: string | null;
+  };
+}
+
+export interface TxSaveStyle {
+  saveStyle: {
+    style: unknown;
+  };
+}
+
+export type TxLoadStyle = "loadStyle";
+export type TxGetTheme = "getTheme";
 
 export interface TxConsoleLogError {
   consoleLogError: {

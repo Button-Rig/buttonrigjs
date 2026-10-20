@@ -19,7 +19,45 @@ export type RxPayload<T> =
   | RxListGrids
   | RxGetWidgetContext
   | RxWidgetContextChanged
+  | RxLoadStyle<T>
+  | RxStyleChanged<T>
+  | RxGetTheme
+  | RxThemeChanged
   | null;
+
+/** A widget instance's style: the JSON object its styler page saved (`{}` when none). */
+export type WidgetStyle = Record<string, unknown>;
+
+/** The app's resolved theme. */
+export type AppTheme = "dark" | "light";
+
+/** Answer to `"loadStyle"`. */
+export interface RxLoadStyle<T> {
+  loadStyle: {
+    style: T;
+  };
+}
+
+/** Pushed to the editor preview and the grid widget when the styler saved a new style. */
+export interface RxStyleChanged<T> {
+  styleChanged: {
+    style: T;
+  };
+}
+
+/** Answer to `"getTheme"`. */
+export interface RxGetTheme {
+  getTheme: {
+    theme: AppTheme;
+  };
+}
+
+/** Pushed to configurator and styler pages when the app's theme changes. */
+export interface RxThemeChanged {
+  themeChanged: {
+    theme: AppTheme;
+  };
+}
 
 /** Grid cells a widget button covers. */
 export interface WidgetSpan {
@@ -36,6 +74,8 @@ export interface WidgetContext {
   buttonId: number | null;
   span: WidgetSpan;
   mode: WidgetMode;
+  /** The instance's style (`{}` when none). Missing in apps older than `buttonrig` 2.2. */
+  style?: WidgetStyle;
 }
 
 /** Answer to `"getWidgetContext"`. */
